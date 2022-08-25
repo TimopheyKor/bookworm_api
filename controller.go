@@ -1,6 +1,8 @@
 package main
 
-import "errors"
+import (
+	"errors"
+)
 
 // controller holds a reference to the database and has methods which call
 // database queries, then format the responses into an appropriate state
@@ -9,9 +11,16 @@ type controller struct {
 	db booksList
 }
 
+// Define global messages.
+var (
+	AddNewSuccess = "sucessfully added new book to db"
+)
+
 // Define global errors.
 var (
-	ErrBookNotFound = errors.New("book not found in db")
+	ErrBookNotFound   = errors.New("book not found in db")
+	ErrDuplicateTitle = errors.New("book title already exists in db")
+	ErrEmptyName      = errors.New("book title cannot be empty")
 )
 
 // getBook calls the db's function to get a book, then returns either the
@@ -28,4 +37,14 @@ func (c *controller) getBook(name string) (*bookData, error) {
 // and returns the map.
 func (c *controller) getAllBooks() map[string]bookData {
 	return c.db.getAllBooks()
+}
+
+// addNewBook takes a name string and calls the db's addNewBook function
+// to add a book to the database. If sucessful, it returns a success message,
+// otherwise it returns an error message and error code.
+func (c *controller) addNewBook(name string) error {
+	if name == "" {
+		return ErrEmptyName
+	}
+	return c.db.addNewBook(name)
 }

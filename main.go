@@ -33,7 +33,13 @@ func (r *router) getAllBooks(c *gin.Context) {
 
 // addBook adds an empty book except for the provided title to the database.
 func (r *router) addBook(c *gin.Context) {
-	//name := c.Param("name")
+	name := c.Param("name")
+	err := r.c.addNewBook(name)
+	if err != nil {
+		c.JSONP(interpretError(err), fmt.Sprintf("Error: %v", err))
+		return
+	}
+	c.Status(http.StatusCreated)
 }
 
 // interpretError takes an error from a controller and returns a corresponding
@@ -42,6 +48,10 @@ func interpretError(e error) int {
 	switch e {
 	case ErrBookNotFound:
 		return http.StatusNotFound
+	case ErrDuplicateTitle:
+		return http.StatusConflict
+	case ErrEmptyName:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
@@ -66,6 +76,9 @@ func main() {
 	r.GET("/book/:name", route.getBook)
 	// Define a function to listen for a GET request for all books
 	r.GET("/book", route.getAllBooks)
+
+	// Define a function to listed for a POST request on a book name
+	r.POST("/book/:name", route.addBook)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

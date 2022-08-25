@@ -23,3 +23,14 @@ func (bl *booksList) getBook(name string) (*bookData, error) {
 func (bl *booksList) getAllBooks() map[string]bookData {
 	return bl.Books
 }
+
+// addNewBook creates a new book titled by the name string and adds it to
+// the database, returning an error if the book already exists.
+func (bl *booksList) addNewBook(name string) error {
+	_, ok := bl.Books[name]
+	if ok {
+		return ErrDuplicateTitle
+	}
+	bl.Books[name] = NewBookData(name)
+	return nil
+}
