@@ -6,3 +6,9 @@ type bookData struct {
 	Author string `json:"author"`
 	Desc   string `json:"description"`
 }
+
+// NewBookData takes a name string and returns a book with the title field
+// filled with the name.
+func NewBookData(name string) bookData {
+	return bookData{Title: name}
+}
