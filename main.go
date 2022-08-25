@@ -7,26 +7,37 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Simple structures for testing Gin & JSON marshalling
-type bookData struct {
-	Title  string `json:"title"`
-	Author string `json:"author"`
-	Desc   string `json:"description"`
-}
-type booksList struct {
-	Books map[string]bookData `json:"books"`
+// Router to access a controller and a logger if necessary. The router should
+// handle all http & gin methods.
+type router struct {
+	c controller
 }
 
 // getBook takes the name of a book from the request context, and returns
 // a JSON response or an error based on if the book exists in the dataset or not.
-func (bl *booksList) getBook(c *gin.Context) {
+func (r *router) getBook(c *gin.Context) {
 	name := c.Param("name")
-	book, ok := bl.Books[name]
-	if ok {
-		c.JSONP(http.StatusOK, book)
+	book, err := r.c.getBook(name)
+	if err != nil {
+		c.Status(interpretError(err))
 		return
 	}
-	c.Status(http.StatusNotFound)
+	c.JSONP(http.StatusOK, book)
+}
+
+// interpretError takes an error from a controller and returns a corresponding
+// http status code.
+func interpretError(e error) int {
+	switch e {
+	case ErrBookNotFound:
+		return http.StatusNotFound
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
+func (r *router) addBook(c *gin.Context) {
+	//name := c.Param("name")
 }
 
 func main() {
@@ -37,11 +48,15 @@ func main() {
 	b0 := bookData{Title: "Luigi", Author: "Nintendo", Desc: "Ghosts in a mansion, get the vacuum cleaner!"}
 	bl.Books["Luigi"] = b0
 
+	// Initialize the custom router and controller
+	control := controller{db: bl}
+	route := router{c: control}
+
 	// Create a gin router "r" with default middleware
 	r := gin.Default()
 
 	// Define a function to listen for a GET request on a book name
-	r.GET("/book/:name", bl.getBook)
+	r.GET("/book/:name", route.getBook)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
