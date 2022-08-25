@@ -25,6 +25,17 @@ func (r *router) getBook(c *gin.Context) {
 	c.JSONP(http.StatusOK, book)
 }
 
+// getAllBooks returns a JSON response containing a map of all the books
+// currently inside the database.
+func (r *router) getAllBooks(c *gin.Context) {
+	c.JSONP(http.StatusOK, r.c.getAllBooks())
+}
+
+// addBook adds an empty book except for the provided title to the database.
+func (r *router) addBook(c *gin.Context) {
+	//name := c.Param("name")
+}
+
 // interpretError takes an error from a controller and returns a corresponding
 // http status code.
 func interpretError(e error) int {
@@ -34,10 +45,6 @@ func interpretError(e error) int {
 	default:
 		return http.StatusInternalServerError
 	}
-}
-
-func (r *router) addBook(c *gin.Context) {
-	//name := c.Param("name")
 }
 
 func main() {
@@ -57,6 +64,8 @@ func main() {
 
 	// Define a function to listen for a GET request on a book name
 	r.GET("/book/:name", route.getBook)
+	// Define a function to listen for a GET request for all books
+	r.GET("/book", route.getAllBooks)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

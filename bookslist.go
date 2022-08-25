@@ -18,3 +18,8 @@ func (bl *booksList) getBook(name string) (*bookData, error) {
 	}
 	return &book, nil
 }
+
+// getAllBooks returns the entire Books map.
+func (bl *booksList) getAllBooks() map[string]bookData {
+	return bl.Books
+}

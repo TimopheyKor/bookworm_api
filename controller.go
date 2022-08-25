@@ -23,3 +23,9 @@ func (c *controller) getBook(name string) (*bookData, error) {
 	}
 	return book, nil
 }
+
+// getAllBooks calls the db's function to get the entire map of books,
+// and returns the map.
+func (c *controller) getAllBooks() map[string]bookData {
+	return c.db.getAllBooks()
+}
