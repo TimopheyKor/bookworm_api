@@ -48,3 +48,12 @@ func (c *controller) addNewBook(name string) error {
 	}
 	return c.db.addNewBook(name)
 }
+
+// addBookWithBody takes a book name and a json bookData object, then attempts
+// to create a new entry in the database by calling addNewBook, then populating
+// the value of that book name entry. It returns an error if addNewBook fails.
+func (c *controller) addBookWithBody(name string, json bookData) error {
+	err := c.addNewBook(name)
+	c.db.populateBookData(name, json)
+	return err
+}

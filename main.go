@@ -42,6 +42,26 @@ func (r *router) addBook(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// addBookWithBody checks to see if a JSON body has been given to the request,
+// then checks if the body is valid. If so, it calls addBook to make a new
+// entry into the database, then populates the book with the JSON body data.
+func (r *router) addBookWithBody(c *gin.Context) {
+	var json bookData
+	name := c.Param("name")
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Populate the book with its JSON data
+	err := r.c.addBookWithBody(name, json)
+	if err != nil {
+		c.JSONP(interpretError(err), fmt.Sprintf("Error: %v", err))
+		return
+	}
+	c.Status(http.StatusCreated)
+}
+
 // interpretError takes an error from a controller and returns a corresponding
 // http status code.
 func interpretError(e error) int {
@@ -77,8 +97,11 @@ func main() {
 	// Define a function to listen for a GET request for all books
 	r.GET("/book", route.getAllBooks)
 
-	// Define a function to listed for a POST request on a book name
+	// Define a function to listen for a POST request on a book name
 	r.POST("/book/:name", route.addBook)
+
+	// Define a function to listen for a POST request with a body on a book
+	r.POST("/bookJSON/:name", route.addBookWithBody)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

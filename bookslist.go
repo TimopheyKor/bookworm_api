@@ -34,3 +34,10 @@ func (bl *booksList) addNewBook(name string) error {
 	bl.Books[name] = NewBookData(name)
 	return nil
 }
+
+// populateBookData takes a book name and a json bookData object, finds the
+// book name in the database, and sets its value to the bookData object.
+func (bl *booksList) populateBookData(name string, json bookData) error {
+	bl.Books[name] = json
+	return nil
+}
