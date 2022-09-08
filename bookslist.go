@@ -1,3 +1,4 @@
+// REDACTING
 package main
 
 import "errors"

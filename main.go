@@ -85,6 +85,7 @@ func main() {
 	fmt.Println("Launching Bookworm CRUD Service...")
 
 	// Instantiate a local MongoDB client
+	// TODO: Put into database layer initialization, passing back the DB struct
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
@@ -111,6 +112,7 @@ func main() {
 	fmt.Println("Inesrtion ID: ", id)
 
 	// Initialize the custom router and controller
+	// TODO: Initialize the controller with the DB struct
 	control := controller{}
 	route := router{c: control}
 
@@ -119,6 +121,7 @@ func main() {
 
 	// Define a function to listen for a GET request on a book name
 	r.GET("/book/:name", route.getBook)
+
 	// Define a function to listen for a GET request for all books
 	r.GET("/book", route.getAllBooks)
 
