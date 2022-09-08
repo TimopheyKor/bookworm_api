@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Router to access a controller and a logger if necessary. The router should
@@ -80,13 +84,34 @@ func interpretError(e error) int {
 func main() {
 	fmt.Println("Launching Bookworm CRUD Service...")
 
+	// Instantiate a local MongoDB client
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+
+	// Error handling and deferred disconnection
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if err = client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
+
+	// Get a collection from the local database
+	bookColl := client.Database("local").Collection("active_books")
+
 	// Some local test data to experiment with
-	bl := booksList{Books: make(map[string]bookData)}
-	b0 := bookData{Title: "Luigi", Author: "Nintendo", Desc: "Ghosts in a mansion, get the vacuum cleaner!"}
-	bl.Books["Luigi"] = b0
+	localBook := bookData{Title: "Luigi", Author: "Nintendo", Desc: "Ghosts in a mansion, get the vacuum cleaner!"}
+
+	// Add the book to the collection
+	result, err := bookColl.InsertOne(ctx, localBook)
+	id := result.InsertedID
+	fmt.Println("Inesrtion ID: ", id)
 
 	// Initialize the custom router and controller
-	control := controller{db: bl}
+	control := controller{}
 	route := router{c: control}
 
 	// Create a gin router "r" with default middleware
