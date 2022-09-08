@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,8 +33,15 @@ func (db *mongoDB) disconnect(ctx context.Context) error {
 	return nil
 }
 
-func addBook() {
-
+// TODO: Change this to use a passed-down gin context.
+// addBook takes a bookData struct and a context, then attempts to add it as a
+// document to the active_books collection of the database.
+func (db *mongoDB) addBook(document bookData, ctx context.Context) error {
+	coll := db.client.Database("local").Collection("active_books")
+	result, err := coll.InsertOne(ctx, document)
+	id := result.InsertedID
+	fmt.Println("Inesrtion ID: ", id)
+	return err
 }
 
 func getBook() {

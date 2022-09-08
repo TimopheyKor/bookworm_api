@@ -17,6 +17,7 @@ type router struct {
 
 // getBook takes the name of a book from the request context, and returns
 // a JSON response or an error based on if the book exists in the dataset or not.
+/*
 func (r *router) getBook(c *gin.Context) {
 	name := c.Param("name")
 	book, err := r.c.getBook(name)
@@ -26,14 +27,18 @@ func (r *router) getBook(c *gin.Context) {
 	}
 	c.JSONP(http.StatusOK, book)
 }
+*/
 
+// TODO: Modify getAllBooks for mongoDB controller
 // getAllBooks returns a JSON response containing a map of all the books
 // currently inside the database.
 func (r *router) getAllBooks(c *gin.Context) {
 	c.JSONP(http.StatusOK, r.c.getAllBooks())
 }
 
+// TODO: Modify addBook for mongoDB controller
 // addBook adds an empty book except for the provided title to the database.
+/*
 func (r *router) addBook(c *gin.Context) {
 	name := c.Param("name")
 	err := r.c.addNewBook(name)
@@ -43,10 +48,13 @@ func (r *router) addBook(c *gin.Context) {
 	}
 	c.Status(http.StatusCreated)
 }
+*/
 
+// TODO: Modify addBookWithBody for mongoDB controller
 // addBookWithBody checks to see if a JSON body has been given to the request,
 // then checks if the body is valid. If so, it calls addBook to make a new
 // entry into the database, then populates the book with the JSON body data.
+/*
 func (r *router) addBookWithBody(c *gin.Context) {
 	var json bookData
 	name := c.Param("name")
@@ -63,10 +71,12 @@ func (r *router) addBookWithBody(c *gin.Context) {
 	}
 	c.Status(http.StatusCreated)
 }
+*/
 
 func main() {
 	fmt.Println("Launching Bookworm CRUD Service...")
 
+	// TODO: Make the URI use environment variables.
 	// Constants
 	const (
 		localURI = "mongodb://localhost:27017"
@@ -85,36 +95,31 @@ func main() {
 		panicIfError(err)
 	}()
 
-	// Get a collection from the local database
-	bookColl := database.client.Database("local").Collection("active_books")
-
 	// Some local test data to experiment with
 	localBook := bookData{Title: "Luigi", Author: "Nintendo", Desc: "Ghosts in a mansion, get the vacuum cleaner!"}
 
-	// Add the book to the collection
-	result, err := bookColl.InsertOne(clientContext, localBook)
-	id := result.InsertedID
-	fmt.Println("Inesrtion ID: ", id)
-
 	// Initialize the custom router and controller
-	// TODO: Initialize the controller with the DB struct
-	control := controller{}
+	control := controller{db: database}
 	route := router{c: control}
+
+	// TESTING: Add the localBook to the database through the controller.
+	control.addBook(localBook, clientContext)
 
 	// Create a gin router "r" with default middleware
 	r := gin.Default()
 
+	// TODO: Make the listener functions interact with the database.
 	// Define a function to listen for a GET request on a book name
-	r.GET("/book/:name", route.getBook)
+	//r.GET("/book/:name", route.getBook)
 
 	// Define a function to listen for a GET request for all books
 	r.GET("/book", route.getAllBooks)
 
 	// Define a function to listen for a POST request on a book name
-	r.POST("/book/:name", route.addBook)
+	//r.POST("/book/:name", route.addBook)
 
 	// Define a function to listen for a POST request with a body on a book
-	r.POST("/bookJSON/:name", route.addBookWithBody)
+	//r.POST("/bookJSON/:name", route.addBookWithBody)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
