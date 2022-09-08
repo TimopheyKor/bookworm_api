@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Router to access a controller and a logger if necessary. The router should
@@ -66,48 +64,35 @@ func (r *router) addBookWithBody(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-// interpretError takes an error from a controller and returns a corresponding
-// http status code.
-func interpretError(e error) int {
-	switch e {
-	case ErrBookNotFound:
-		return http.StatusNotFound
-	case ErrDuplicateTitle:
-		return http.StatusConflict
-	case ErrEmptyName:
-		return http.StatusBadRequest
-	default:
-		return http.StatusInternalServerError
-	}
-}
-
 func main() {
 	fmt.Println("Launching Bookworm CRUD Service...")
 
-	// Instantiate a local MongoDB client
-	// TODO: Put into database layer initialization, passing back the DB struct
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// Constants
+	const (
+		localURI = "mongodb://localhost:27017"
+	)
+
+	// Instantiate a local MongoDB client with a fresh context. Time out the
+	// request if it's not completed in 10 seconds.
+	clientContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	database, err := newMongoDB(clientContext, localURI)
 
 	// Error handling and deferred disconnection
-	if err != nil {
-		panic(err)
-	}
+	panicIfError(err)
 	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
+		err = database.disconnect(clientContext)
+		panicIfError(err)
 	}()
 
 	// Get a collection from the local database
-	bookColl := client.Database("local").Collection("active_books")
+	bookColl := database.client.Database("local").Collection("active_books")
 
 	// Some local test data to experiment with
 	localBook := bookData{Title: "Luigi", Author: "Nintendo", Desc: "Ghosts in a mansion, get the vacuum cleaner!"}
 
 	// Add the book to the collection
-	result, err := bookColl.InsertOne(ctx, localBook)
+	result, err := bookColl.InsertOne(clientContext, localBook)
 	id := result.InsertedID
 	fmt.Println("Inesrtion ID: ", id)
 

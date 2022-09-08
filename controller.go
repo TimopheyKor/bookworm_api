@@ -1,27 +1,11 @@
 package main
 
-import (
-	"errors"
-)
-
 // controller holds a reference to the database and has methods which call
 // database queries, then format the responses into an appropriate state
 // for the router to handle.
 type controller struct {
 	db booksList
 }
-
-// Define global messages.
-var (
-	AddNewSuccess = "sucessfully added new book to db"
-)
-
-// Define global errors.
-var (
-	ErrBookNotFound   = errors.New("book not found in db")
-	ErrDuplicateTitle = errors.New("book title already exists in db")
-	ErrEmptyName      = errors.New("book title cannot be empty")
-)
 
 // getBook calls the db's function to get a book, then returns either the
 // bookData or an error based on if the book was found or not.
