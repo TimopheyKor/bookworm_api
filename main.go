@@ -32,23 +32,28 @@ func (r *router) getBook(c *gin.Context) {
 // TODO: Modify getAllBooks for mongoDB controller
 // getAllBooks returns a JSON response containing a map of all the books
 // currently inside the database.
+/*
 func (r *router) getAllBooks(c *gin.Context) {
 	c.JSONP(http.StatusOK, r.c.getAllBooks())
 }
+*/
 
-// TODO: Modify addBook for mongoDB controller
-// addBook adds an empty book except for the provided title to the database.
-/*
+// addBook takes a JSON-formatted body from a post request, and attempts to
+// add it as a book document into the active_books database.
 func (r *router) addBook(c *gin.Context) {
-	name := c.Param("name")
-	err := r.c.addNewBook(name)
+	var data bookData
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := r.c.addBook(data, c)
 	if err != nil {
 		c.JSONP(interpretError(err), fmt.Sprintf("Error: %v", err))
 		return
 	}
 	c.Status(http.StatusCreated)
 }
-*/
 
 // TODO: Modify addBookWithBody for mongoDB controller
 // addBookWithBody checks to see if a JSON body has been given to the request,
@@ -108,15 +113,15 @@ func main() {
 	// Create a gin router "r" with default middleware
 	r := gin.Default()
 
-	// TODO: Make the listener functions interact with the database.
+	// TODO: Make  all the listener functions interact with the database.
 	// Define a function to listen for a GET request on a book name
 	//r.GET("/book/:name", route.getBook)
 
 	// Define a function to listen for a GET request for all books
-	r.GET("/book", route.getAllBooks)
+	//r.GET("/books", route.getAllBooks)
 
 	// Define a function to listen for a POST request on a book name
-	//r.POST("/book/:name", route.addBook)
+	r.POST("/books/addBookData", route.addBook)
 
 	// Define a function to listen for a POST request with a body on a book
 	//r.POST("/bookJSON/:name", route.addBookWithBody)
