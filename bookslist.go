@@ -1,4 +1,5 @@
-// REDACTING
+// Everything in this file is DEPRECATED.
+// This file was previously used to simulate a local databse with a map struct.
 package main
 
 import "errors"
