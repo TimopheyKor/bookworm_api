@@ -32,7 +32,13 @@ func (r *router) getBook(c *gin.Context) {
 // getAllBooks returns a JSON response containing a map of all the books
 // currently inside the database.
 func (r *router) getAllBooks(c *gin.Context) {
-	c.JSONP(http.StatusOK, r.c.getAllBooks())
+	bookData, err := r.c.getAllBooks(c)
+	if err != nil {
+		c.JSONP(interpretError(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSONP(http.StatusOK, gin.H{"books": bookData})
 }
 
 // addBook takes a JSON-formatted body from a post request, attempts to bind the

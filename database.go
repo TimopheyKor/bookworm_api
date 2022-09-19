@@ -58,7 +58,7 @@ func (db *mongoDB) addBook(document bookData, ctx context.Context) error {
 // getAllBooks takes a request context, then creates a cursor with which it
 // iterates over all available documents in the active_books collection
 // of the database, populates a slice with them, and returns the slice.
-func (db *mongoDB) getAllBooks(ctx context.Context) ([]bson.D, error) {
+func (db *mongoDB) getAllBooks(ctx context.Context) ([]bookData, error) {
 	coll := db.client.Database(dbLocalData).Collection(activeCollection)
 
 	// Attempt to aggregate the data into a cursor variable.
@@ -66,9 +66,11 @@ func (db *mongoDB) getAllBooks(ctx context.Context) ([]bson.D, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 
-	// Populate a slice with all the book data using the cursor.
-	var allBooks []bson.D
+	// Populate a slice with all the book data using the cursor. cursor.All()
+	// automatically unmarshalls the bson data into bookData.
+	var allBooks []bookData
 	err = cursor.All(ctx, &allBooks)
 	if err != nil {
 		return nil, err
@@ -76,8 +78,11 @@ func (db *mongoDB) getAllBooks(ctx context.Context) ([]bson.D, error) {
 	return allBooks, nil
 }
 
-func getBook() {
-
+// getBook takes the name of a book as a string and the request context, then
+// attempts to find a book with that title in the databse, returning the book's
+// data if it is successful.
+func (db *mongoDB) getBook(name string, ctx context.Context) (bookData, error) {
+	return bookData{}, nil
 }
 
 func updateBook() {
