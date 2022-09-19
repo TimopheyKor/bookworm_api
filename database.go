@@ -81,8 +81,18 @@ func (db *mongoDB) getAllBooks(ctx context.Context) ([]bookData, error) {
 // getBook takes the name of a book as a string and the request context, then
 // attempts to find a book with that title in the databse, returning the book's
 // data if it is successful.
-func (db *mongoDB) getBook(name string, ctx context.Context) (bookData, error) {
-	return bookData{}, nil
+func (db *mongoDB) getBook(name string, ctx context.Context) (*bookData, error) {
+	coll := db.client.Database(dbLocalData).Collection(activeCollection)
+
+	var book bookData
+	err := coll.FindOne(ctx, bson.D{{"title", name}}).Decode(&book)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrBookNotFound
+		}
+		return nil, err
+	}
+	return &book, nil
 }
 
 func updateBook() {

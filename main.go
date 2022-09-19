@@ -15,19 +15,18 @@ type router struct {
 	c controller
 }
 
-// getBook takes the name of a book from the request context, and returns
+// getBook takes the name of a book from the request context, calls to the
+// controller to attempt to find a book with a title matching the name, and returns
 // a JSON response or an error based on if the book exists in the dataset or not.
-/*
 func (r *router) getBook(c *gin.Context) {
 	name := c.Param("name")
-	book, err := r.c.getBook(name)
+	book, err := r.c.getBook(name, c)
 	if err != nil {
 		c.Status(interpretError(err))
 		return
 	}
 	c.JSONP(http.StatusOK, book)
 }
-*/
 
 // getAllBooks returns a JSON response containing a map of all the books
 // currently inside the database.
@@ -90,7 +89,7 @@ func main() {
 
 	// TODO: Make all the listener functions interact with the database.
 	// Listen for a GET request on a book name, which returns a book of that name.
-	//r.GET("/book/:name", route.getBook)
+	r.GET("/books/:name", route.getBook)
 
 	// Listen for a GET request, which returns all the books in the database.
 	r.GET("/books", route.getAllBooks)

@@ -27,3 +27,12 @@ func (c *controller) getAllBooks(ctx context.Context) ([]bookData, error) {
 	}
 	return allBooks, nil
 }
+
+// TODO: Figure out what functionality can be added to this controller function.
+// getBook takes a name string and request context, calls to the database layer
+// to find a book with a matching title, then returns the book's data to the
+// router if it's successful.
+func (c *controller) getBook(name string, ctx context.Context) (*bookData, error) {
+	book, err := c.db.getBook(name, ctx)
+	return book, err
+}
