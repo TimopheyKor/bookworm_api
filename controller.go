@@ -36,3 +36,12 @@ func (c *controller) getBook(name string, ctx context.Context) (*bookData, error
 	book, err := c.db.getBook(name, ctx)
 	return book, err
 }
+
+// TODO: Figure out what functionality can be added to this controller function.
+// deleteBook takes a name string and a request context, calls to the database
+// layer to find and delete the entry of the first book who's title matches, and
+// returns an error if unsuccessful.
+func (c *controller) deleteBook(name string, ctx context.Context) error {
+	err := c.db.deleteBook(name, ctx)
+	return err
+}

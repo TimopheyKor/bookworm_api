@@ -95,6 +95,21 @@ func (db *mongoDB) getBook(name string, ctx context.Context) (*bookData, error) 
 	return &book, nil
 }
 
-func updateBook() {
+// deleteBook takes a name string and deletes the first book found in the
+// database with a corresponding name, and returns a copy of the deleted
+// document's data if successful.
+func (db *mongoDB) deleteBook(name string, ctx context.Context) error {
+	coll := db.client.Database(dbLocalData).Collection(activeCollection)
+	filter := bson.D{{"title", name}}
 
+	_, err := coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: Write database layer update functionality
+func (db *mongoDB) updateBook() error {
+	return nil
 }

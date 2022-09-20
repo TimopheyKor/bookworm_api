@@ -22,7 +22,7 @@ func (r *router) getBook(c *gin.Context) {
 	name := c.Param("name")
 	book, err := r.c.getBook(name, c)
 	if err != nil {
-		c.Status(interpretError(err))
+		c.JSONP(interpretError(err), gin.H{"error": err.Error()})
 		return
 	}
 	c.JSONP(http.StatusOK, book)
@@ -56,6 +56,20 @@ func (r *router) addBook(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusCreated)
+}
+
+// TODO: Create a variant of deleteBook which returns the deleted book's info.
+// deleteBook takes the name of a book from request context, then calls to the
+// controller to attempt to find and delete a book with that name from the
+// database.
+func (r *router) deleteBook(c *gin.Context) {
+	name := c.Param("name")
+	err := r.c.deleteBook(name, c)
+	if err != nil {
+		c.JSONP(interpretError(err), gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
 func main() {
@@ -97,8 +111,9 @@ func main() {
 	// Listen for a POST request, which adds a new book to the database.
 	r.POST("/books", route.addBook)
 
-	// Define a function to listen for a POST request with a body on a book
-	//r.POST("/bookJSON/:name", route.addBookWithBody)
+	// Listen for a DELETE request on a book name, which attempts to delete a
+	// book of that name.
+	r.DELETE("/books/:name", route.deleteBook)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
