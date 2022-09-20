@@ -1,4 +1,4 @@
-module bookworm_api
+module github.com/TimopheyKor/bookworm_api
 
 go 1.19
 
