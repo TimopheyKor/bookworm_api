@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -88,10 +89,15 @@ func main() {
 	database, err := newMongoDB(clientContext, localURI)
 
 	// Error handling and deferred disconnection
-	panicIfError(err)
+	if err != nil {
+		panic(err)
+	}
 	defer func() {
-		err = database.disconnect(clientContext)
-		panicIfError(err)
+		if err := database.disconnect(clientContext); err != nil {
+			// slog.Error("disconnect db", slog.Any("error", err))
+			fmt.Fprintf(os.Stderr, "disconnect db: %s", err)
+			os.Exit(1)
+		}
 	}()
 
 	// Initialize the custom router and controller
