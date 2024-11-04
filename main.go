@@ -93,6 +93,7 @@ func main() {
 		panic(err)
 	}
 	defer func() {
+		fmt.Printf("hello\n")
 		if err := database.disconnect(clientContext); err != nil {
 			// slog.Error("disconnect db", slog.Any("error", err))
 			fmt.Fprintf(os.Stderr, "disconnect db: %s", err)
